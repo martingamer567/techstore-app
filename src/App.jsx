@@ -4,7 +4,7 @@ import NavBar from './components/NavBar'
 import ItemListContainer from './components/ItemListContainer'
 import ItemDetailContainer from './components/ItemDetailContainer'
 import Cart from './components/Cart'
-import CheckoutForm from './components/CheckoutForm'
+import CheckoutForm from './components/CheckOutForm'
 import './App.css'
 
 function App() {
