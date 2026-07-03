@@ -4,14 +4,13 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 import { db } from "../service/firebase"
 import { CartContext } from "../context/CartContext"
 import { Button, Form } from "react-bootstrap"
-
+import Swal from "sweetalert2"
 
 const CheckoutForm = () => {
   const { cart, totalPrecio, clear } = useContext(CartContext)
 
   const [buyer, setBuyer] = useState({ name: "", lastname: "", address: "", mail: "" })
   const [secondMail, setSecondMail] = useState("")
-  const [errors, setErrors] = useState(null)
   const [loading, setLoading] = useState(false)
   const [orderId, setOrderId] = useState(null)
 
@@ -23,30 +22,53 @@ const CheckoutForm = () => {
     e.preventDefault()
 
     if (!buyer.name || !buyer.lastname || !buyer.address || !buyer.mail || !secondMail) {
-      setErrors("Por favor complete todos los campos")
-    } else if (buyer.mail !== secondMail) {
-      setErrors("Los correos no coinciden!")
-    } else {
-      setErrors(null)
-      setLoading(true)
-
-      const orden = {
-        comprador: buyer,
-        carrito: cart,
-        total: totalPrecio(),
-        fecha: serverTimestamp()
-      }
-
-      const orderColl = collection(db, "orders")
-
-      addDoc(orderColl, orden)
-        .then((res) => {
-          clear()
-          setOrderId(res.id)
-        })
-        .catch((error) => console.log(error))
-        .finally(() => setLoading(false))
+      Swal.fire({
+        icon: "warning",
+        title: "Faltan datos",
+        text: "Completá todos los campos antes de continuar"
+      })
+      return
     }
+
+    if (buyer.mail !== secondMail) {
+      Swal.fire({
+        icon: "error",
+        title: "Los correos no coinciden",
+        text: "Revisá que ambos campos de email sean iguales"
+      })
+      return
+    }
+
+    setLoading(true)
+
+    const orden = {
+      comprador: buyer,
+      carrito: cart,
+      total: totalPrecio(),
+      fecha: serverTimestamp()
+    }
+
+    const orderColl = collection(db, "orders")
+
+    addDoc(orderColl, orden)
+      .then((res) => {
+        clear()
+        setOrderId(res.id)
+        Swal.fire({
+          icon: "success",
+          title: "¡Compra confirmada!",
+          text: "Tu orden fue generada con éxito"
+        })
+      })
+      .catch((error) => {
+        console.log(error)
+        Swal.fire({
+          icon: "error",
+          title: "Ocurrió un error",
+          text: "No pudimos procesar tu compra, intentá de nuevo"
+        })
+      })
+      .finally(() => setLoading(false))
   }
 
   if (cart.length === 0 && !orderId) {
@@ -71,7 +93,6 @@ const CheckoutForm = () => {
       ) : (
         <div>
           <h1>Complete sus datos</h1>
-          {errors && <p style={{ color: "red" }}>{errors}</p>}
 
           <Form onSubmit={terminarCompra} style={{ maxWidth: "400px" }}>
             <Form.Group className="mb-3">
