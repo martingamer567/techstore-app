@@ -7,30 +7,42 @@ import ItemList from "./ItemList"
 const ItemListContainer = () => {
   const [productos, setProductos] = useState([])
   const [loading, setLoading] = useState(true)
-  const { categoria } = useParams()
+  const { categoria, busqueda } = useParams()
 
   useEffect(() => {
     setLoading(true)
 
-    const productosRef = categoria
-      ? query(collection(db, "productos"), where("categoria", "==", categoria))
-      : collection(db, "productos")
+    if (busqueda) {
+      
+      getDocs(collection(db, "productos"))
+        .then((res) => {
+          const lista = res.docs
+            .map((doc) => ({ id: doc.id, ...doc.data() }))
+            .filter((prod) =>
+              prod.nombre.toLowerCase().includes(busqueda.toLowerCase())
+            )
+          setProductos(lista)
+        })
+        .catch((error) => console.log(error))
+        .finally(() => setLoading(false))
+    } else {
+      const productosRef = categoria
+        ? query(collection(db, "productos"), where("categoria", "==", categoria))
+        : collection(db, "productos")
 
-    getDocs(productosRef)
-      .then((res) => {
-        const lista = res.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
-        }))
-        setProductos(lista)
-      })
-      .catch((error) => console.log(error))
-      .finally(() => setLoading(false))
-  }, [categoria])
+      getDocs(productosRef)
+        .then((res) => {
+          const lista = res.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+          setProductos(lista)
+        })
+        .catch((error) => console.log(error))
+        .finally(() => setLoading(false))
+    }
+  }, [categoria, busqueda])
 
   return (
     <div>
-      {loading ? <p>Cargando productos...</p> : <ItemList productos={productos} />}
+      {loading ? <p style={{ padding: "20px" }}>Cargando productos...</p> : <ItemList productos={productos} />}
     </div>
   )
 }
