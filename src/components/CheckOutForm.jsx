@@ -5,6 +5,7 @@ import { db } from "../service/firebase"
 import { CartContext } from "../context/CartContext"
 import { Button, Form } from "react-bootstrap"
 
+
 const CheckoutForm = () => {
   const { cart, totalPrecio, clear } = useContext(CartContext)
 
