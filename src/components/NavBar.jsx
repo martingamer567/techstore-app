@@ -38,14 +38,16 @@ const NavBar = () => {
             <Button variant="outline-light" type="submit">Buscar</Button>
           </Form>
 
-          <Nav.Link
+          <Button
+            as="a"
             href="https://github.com/martingamer567/techstore-app"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ marginRight: "15px" }}
+            variant="outline-light"
+            style={{ marginRight: "15px", whiteSpace: "nowrap" }}
           >
             GitHub
-          </Nav.Link>
+          </Button>
 
           <CartWidget />
         </Navbar.Collapse>
